@@ -30,6 +30,16 @@ describe ScheduledModel do
           its(:rrules){ should be_blank }
         end
 
+        context "given :duration=>3600" do
+          let(:schedule_attributes){ { :repeat => '1', :start_date => '1-1-1985', :interval_unit => 'day', :interval => '3', :duration => '3600' } }
+          its(:duration) { should == 3600 }
+        end
+
+        context "given no :duration" do
+          let(:schedule_attributes){ { :repeat => '1', :start_date => '1-1-1985', :interval_unit => 'day', :interval => '3' } }
+          its(:duration) { should be_nil }
+        end
+
         context "given :interval_unit=>day" do
           let(:schedule_attributes){ { :repeat => '1', :start_date => '1-1-1985', :interval_unit => 'day', :interval => '3' } }
           its(:start_date){ should == Date.new(1985, 1, 1).to_time }

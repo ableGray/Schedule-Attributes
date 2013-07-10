@@ -30,6 +30,10 @@ Because they are coming from a form, all parameters are expected to be in string
 
 Can be `0` or `1`. The parameter should respond to `:to_i`. `0` indicates that the event does not repeat. Anything else indicates that the event repeats.
 
+#### `:duration`
+
+Should be `1` or greater.  The parameter is delegated to the `IceCube` initialization.
+
 #### Parameters for non-repeating events
 
 The following parameters will only be used if the `repeat` parameter is `0`.

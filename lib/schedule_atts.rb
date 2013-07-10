@@ -19,15 +19,16 @@ module ScheduleAtts
   def schedule_attributes=(options)
     options = options.dup
     options[:interval] = options[:interval].to_i
+    options[:duration] = options[:duration].to_i if options.has_key?(:duration)
     options[:start_date] &&= ScheduleAttributes.parse_in_timezone(options[:start_date])
     options[:date]       &&= ScheduleAttributes.parse_in_timezone(options[:date])
     options[:until_date] &&= ScheduleAttributes.parse_in_timezone(options[:until_date])
 
     if options[:repeat].to_i == 0
-      @schedule = IceCube::Schedule.new(options[:date])
+      @schedule = IceCube::Schedule.new(options[:date], :duration => options[:duration])
       @schedule.add_recurrence_date(options[:date])
     else
-      @schedule = IceCube::Schedule.new(options[:start_date])
+      @schedule = IceCube::Schedule.new(options[:start_date], :duration => options[:duration])
 
       rule = case options[:interval_unit]
         when 'day'
