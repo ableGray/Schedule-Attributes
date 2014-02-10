@@ -21,13 +21,13 @@ module ScheduleAtts
     options[:interval] = options[:interval].to_i
     options[:start_date] &&= ScheduleAttributes.parse_in_timezone(options[:start_date])
     options[:date]       &&= ScheduleAttributes.parse_in_timezone(options[:date])
-    options[:until_date] &&= ScheduleAttributes.parse_in_timezone(options[:until_date])
+    options[:end_time] &&= ScheduleAttributes.parse_in_timezone(options[:end_time]) if options[:ends] == 'eventually'
 
     if options[:repeat].to_i == 0
       @schedule = IceCube::Schedule.new(options[:date])
       @schedule.add_recurrence_date(options[:date])
     else
-      @schedule = IceCube::Schedule.new(options[:start_date])
+      @schedule = IceCube::Schedule.new(options[:start_date], options)
 
       rule = case options[:interval_unit]
         when 'day'
@@ -37,8 +37,6 @@ module ScheduleAtts
         when 'month'
           IceCube::Rule.monthly options[:interval]
       end
-
-      rule.until(options[:until_date]) if options[:ends] == 'eventually'
 
       @schedule.add_recurrence_rule(rule)
     end
@@ -70,7 +68,7 @@ module ScheduleAtts
       end
 
       if rule.until_date
-        atts[:until_date] = rule.until_date.to_date
+        atts[:end_time] = rule.until_date.to_date
         atts[:ends] = 'eventually'
       else
         atts[:ends] = 'never'
