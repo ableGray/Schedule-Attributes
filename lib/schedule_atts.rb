@@ -19,24 +19,27 @@ module ScheduleAtts
   def schedule_attributes=(options)
     options = options.dup
     options[:interval] = options[:interval].to_i
-    options[:start_date] &&= ScheduleAttributes.parse_in_timezone(options[:start_date])
+    options[:start_date] &&= ScheduleAttributes.parse_in_timezone(options[:start_date]) # IS: in icecube master, start_date is deprecated in favor of start_time
     options[:date]       &&= ScheduleAttributes.parse_in_timezone(options[:date])
-    options[:until_date] &&= ScheduleAttributes.parse_in_timezone(options[:until_date])
+    # options[:until_date] &&= ScheduleAttributes.parse_in_timezone(options[:until_date])
+    options[:end_time] &&= ScheduleAttributes.parse_in_timezone(options[:end_time]) if options[:ends] == 'eventually'  # IS: in icecube master, end_time is deprecated in favor of until_time
 
     if options[:repeat].to_i == 0
       @schedule = IceCube::Schedule.new(options[:date])
       @schedule.add_recurrence_date(options[:date])
     else
-      @schedule = IceCube::Schedule.new(options[:start_date])
+      @schedule = IceCube::Schedule.new(options[:start_date], options)
 
       rule = case options[:interval_unit]
         when 'day'
           IceCube::Rule.daily options[:interval]
         when 'week'
           IceCube::Rule.weekly(options[:interval]).day( *IceCube::DAYS.keys.select{|day| options[day].to_i == 1 } )
+        when 'month'
+          IceCube::Rule.monthly options[:interval]
       end
 
-      rule.until(options[:until_date]) if options[:ends] == 'eventually'
+      rule.until(options[:end_time]) if options[:ends] == 'eventually'
 
       @schedule.add_recurrence_rule(rule)
     end
@@ -47,9 +50,11 @@ module ScheduleAtts
   def schedule_attributes
     atts = {}
 
-    if rule = schedule.rrules.first
+    s = schedule_yaml ? IceCube::Schedule.from_yaml(schedule_yaml) : schedule
+
+    if rule = s.rrules.last
       atts[:repeat]     = 1
-      atts[:start_date] = schedule.start_date.to_date
+      atts[:start_date] = s.start_date.to_date
       atts[:date]       = Date.today # for populating the other part of the form
 
       rule_hash = rule.to_hash
@@ -63,17 +68,20 @@ module ScheduleAtts
         rule_hash[:validations][:day].each do |day_idx|
           atts[ DAY_NAMES[day_idx] ] = 1
         end
+      when IceCube::MonthlyRule
+        atts[:interval_unit] = 'month'
       end
 
       if rule.until_date
         atts[:until_date] = rule.until_date.to_date
+        atts[:end_time] = rule.until_date.to_date
         atts[:ends] = 'eventually'
       else
         atts[:ends] = 'never'
       end
     else
       atts[:repeat]     = 0
-      atts[:date]       = schedule.start_date.to_date
+      atts[:date]       = s.start_date.to_date
       atts[:start_date] = Date.today # for populating the other part of the form
     end
 
