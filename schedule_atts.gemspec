@@ -4,11 +4,11 @@ require "schedule_atts/version"
 
 Gem::Specification.new do |s|
   s.name        = "schedule_atts"
-  s.version     = ScheduleAtts::VERSION
+  s.version     = "0.0.2"
   s.platform    = Gem::Platform::RUBY
-  s.authors     = ["Mike Nicholaides"]
-  s.email       = ["mike@ablegray.com"]
-  s.homepage    = "http://ablegray.com"
+  s.authors     = ["Mike Nicholaides, but then people at Kapost"]
+  s.email       = ["mike@ablegray.com / dev@kapost.com"]
+  s.homepage    = "http://ablegray.com / kapost.com"
   s.summary     = %q{Provides form attributes setting a recurring schedule.}
   s.description = %q{Provides form attributes setting a recurring schedule.}
 
